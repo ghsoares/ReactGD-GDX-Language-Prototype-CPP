@@ -73,14 +73,50 @@ bool Lexer::match(std::string str)
 	return false;
 }
 
-bool Lexer::match(bool (*func)(Lexer *lexer), bool sliceRange)
+bool Lexer::match(bool (*func)(), bool sliceRange)
 {
 	this->cursor.skipIgnore();
 
 	const Cursor tCursor = this->cursor;
 	const int mPos = this->matchStack.size();
 
-	if (func(this))
+	if (func())
+	{
+		if (sliceRange)
+		{
+			const std::string str = this->input.substr(
+					tCursor.pos,
+					this->getCursorEnd(-1).pos - tCursor.pos + 1);
+			this->matchStack.push_back(str);
+		}
+		else
+		{
+			const std::string str = this->fromSliced(mPos);
+			this->matchStack.push_back(str);
+		}
+		this->cursorStack.push_back({tCursor, this->cursor});
+		return true;
+	}
+	else
+	{
+		for (int i = this->cursorStack.size() - 1; i >= mPos; i--)
+		{
+			this->matchStack.pop_back();
+			this->cursorStack.pop_back();
+		}
+		this->cursor.move(tCursor.pos);
+	}
+	return false;
+}
+
+bool Lexer::match(std::function<bool()> func, bool sliceRange)
+{
+	this->cursor.skipIgnore();
+
+	const Cursor tCursor = this->cursor;
+	const int mPos = this->matchStack.size();
+
+	if (func())
 	{
 		if (sliceRange)
 		{
@@ -190,4 +226,3 @@ bool Lexer::expect(T str, std::string msg) throw(LexerException) {
 
 	throw(LexerException(msg, tCursor));
 }
-

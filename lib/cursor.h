@@ -2,6 +2,7 @@
 #define T_CURSOR
 
 #include <iostream>
+#include <sstream>
 
 struct Cursor
 {

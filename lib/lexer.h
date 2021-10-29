@@ -6,6 +6,7 @@
 #include <regex>
 #include "cursor.h"
 
+// Definition
 struct LexerException : public std::exception
 {
 private:
@@ -21,6 +22,14 @@ public:
 	{
 		return this->msg.c_str();
 	}
+};
+
+struct Token
+{
+public:
+	Cursor start;
+	Cursor end;
+	Token(Cursor start, Cursor end) : start(start), end(end) {}
 };
 
 class Lexer
@@ -47,16 +56,14 @@ protected:
 		return s;
 	}
 
-public:
-	Lexer(std::string input);
-
 	std::string getStr(int pos);
 	void setStr(int pos, std::string str);
 	Cursor getCursorStart(int pos);
 	Cursor getCursorEnd(int pos);
 
 	bool match(std::string str);
-	bool match(bool (*func)(Lexer *lexer), bool sliceRange = false);
+	bool match(bool (*func)(), bool sliceRange = false);
+	bool match(std::function<bool()> func, bool sliceRange = false);
 	bool match(std::regex reg);
 
 	template <typename T>
@@ -67,6 +74,11 @@ public:
 	bool matchScope(T strOpen, T strClose);
 	template <typename T>
 	bool expect(T str, std::string msg) throw(LexerException);
+
+	virtual Token getToken();
+
+public:
+	Lexer(std::string input);
 };
 
 #endif
