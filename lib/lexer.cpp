@@ -2,165 +2,129 @@
 
 Lexer::Lexer(std::string input) : cursor(input)
 {
-	this->input = input;
+	input = input;
 }
 
 std::string Lexer::getStr(int pos)
 {
-	if (this->matchStack.size() == 0)
-		return this->input;
+	if (matchStack.size() == 0)
+		return input;
 	while (pos < 0)
-		pos += this->matchStack.size();
-	while (pos >= this->matchStack.size())
-		pos -= this->matchStack.size();
+		pos += matchStack.size();
+	while (pos >= matchStack.size())
+		pos -= matchStack.size();
 
-	return this->matchStack[pos];
+	return matchStack[pos];
 }
 
 void Lexer::setStr(int pos, std::string str)
 {
-	if (this->matchStack.size() == 0)
+	if (matchStack.size() == 0)
 		return;
 	while (pos < 0)
-		pos += this->matchStack.size();
-	while (pos >= this->matchStack.size())
-		pos -= this->matchStack.size();
+		pos += matchStack.size();
+	while (pos >= matchStack.size())
+		pos -= matchStack.size();
 
-	this->matchStack[pos] = str;
+	matchStack[pos] = str;
 }
 
 Cursor Lexer::getCursorStart(int pos)
 {
-	if (this->cursorStack.size() == 0)
-		return Cursor(this->input);
+	if (cursorStack.size() == 0)
+		return Cursor(input);
 	while (pos < 0)
-		pos += this->cursorStack.size();
-	while (pos >= this->cursorStack.size())
-		pos -= this->cursorStack.size();
+		pos += cursorStack.size();
+	while (pos >= cursorStack.size())
+		pos -= cursorStack.size();
 
-	return this->cursorStack[pos][0];
+	return cursorStack[pos][0];
 }
 
 Cursor Lexer::getCursorEnd(int pos)
 {
-	if (this->cursorStack.size() == 0)
-		return Cursor(this->input);
+	if (cursorStack.size() == 0)
+		return Cursor(input);
 	while (pos < 0)
-		pos += this->cursorStack.size();
-	while (pos >= this->cursorStack.size())
-		pos -= this->cursorStack.size();
+		pos += cursorStack.size();
+	while (pos >= cursorStack.size())
+		pos -= cursorStack.size();
 
-	return this->cursorStack[pos][1];
+	return cursorStack[pos][1];
 }
 
 bool Lexer::match(std::string str)
 {
-	this->cursor.skipIgnore();
+	cursor.skipIgnore();
 
-	const std::string ss = this->input.substr(this->cursor.pos, str.length());
+	const std::string ss = input.substr(cursor.pos, str.length());
 
 	if (ss == str)
 	{
-		this->matchStack.push_back(ss);
-		const Cursor startCursor = this->cursor;
-		this->cursor.walkTimes(str.length());
-		const Cursor endCursor = this->cursor;
-		this->cursorStack.push_back({startCursor, endCursor});
+		matchStack.push_back(ss);
+		const Cursor startCursor = cursor;
+		cursor.walkTimes(str.length());
+		const Cursor endCursor = cursor;
+		cursorStack.push_back({startCursor, endCursor});
 
 		return true;
 	}
 
-	return false;
-}
-
-bool Lexer::match(bool (*func)(), bool sliceRange)
-{
-	this->cursor.skipIgnore();
-
-	const Cursor tCursor = this->cursor;
-	const int mPos = this->matchStack.size();
-
-	if (func())
-	{
-		if (sliceRange)
-		{
-			const std::string str = this->input.substr(
-					tCursor.pos,
-					this->getCursorEnd(-1).pos - tCursor.pos + 1);
-			this->matchStack.push_back(str);
-		}
-		else
-		{
-			const std::string str = this->fromSliced(mPos);
-			this->matchStack.push_back(str);
-		}
-		this->cursorStack.push_back({tCursor, this->cursor});
-		return true;
-	}
-	else
-	{
-		for (int i = this->cursorStack.size() - 1; i >= mPos; i--)
-		{
-			this->matchStack.pop_back();
-			this->cursorStack.pop_back();
-		}
-		this->cursor.move(tCursor.pos);
-	}
 	return false;
 }
 
 bool Lexer::match(std::function<bool()> func, bool sliceRange)
 {
-	this->cursor.skipIgnore();
+	cursor.skipIgnore();
 
-	const Cursor tCursor = this->cursor;
-	const int mPos = this->matchStack.size();
+	const Cursor tCursor = cursor;
+	const int mPos = matchStack.size();
 
 	if (func())
 	{
 		if (sliceRange)
 		{
-			const std::string str = this->input.substr(
+			const std::string str = input.substr(
 					tCursor.pos,
-					this->getCursorEnd(-1).pos - tCursor.pos + 1);
-			this->matchStack.push_back(str);
+					getCursorEnd(-1).pos - tCursor.pos + 1);
+			matchStack.push_back(str);
 		}
 		else
 		{
-			const std::string str = this->fromSliced(mPos);
-			this->matchStack.push_back(str);
+			const std::string str = fromSliced(mPos);
+			matchStack.push_back(str);
 		}
-		this->cursorStack.push_back({tCursor, this->cursor});
+		cursorStack.push_back({tCursor, cursor});
 		return true;
 	}
 	else
 	{
-		for (int i = this->cursorStack.size() - 1; i >= mPos; i--)
+		for (int i = cursorStack.size() - 1; i >= mPos; i--)
 		{
-			this->matchStack.pop_back();
-			this->cursorStack.pop_back();
+			matchStack.pop_back();
+			cursorStack.pop_back();
 		}
-		this->cursor.move(tCursor.pos);
+		cursor.move(tCursor.pos);
 	}
 	return false;
 }
 
 bool Lexer::match(std::regex reg)
 {
-	this->cursor.skipIgnore();
+	cursor.skipIgnore();
 
-	const std::string ss = this->input.substr(this->cursor.pos);
+	const std::string ss = input.substr(cursor.pos);
 	std::smatch match;
 
 	if (std::regex_search(ss, match, reg))
 	{
 		if (match.position() == 0)
 		{
-			this->matchStack.push_back(match.str());
-			const Cursor startCursor = this->cursor;
-			this->cursor.walkTimes(match.length());
-			const Cursor endCursor = this->cursor;
-			this->cursorStack.push_back({startCursor, endCursor});
+			matchStack.push_back(match.str());
+			const Cursor startCursor = cursor;
+			cursor.walkTimes(match.length());
+			const Cursor endCursor = cursor;
+			cursorStack.push_back({startCursor, endCursor});
 			return true;
 		}
 	}
@@ -171,14 +135,14 @@ bool Lexer::match(std::regex reg)
 template <typename T>
 bool Lexer::matchUntil(T str)
 {
-	while (!this->cursor.eof)
+	while (!cursor.eof)
 	{
-		if (this->match(str))
+		if (match(str))
 		{
 			return true;
 		}
 		else
-			this->cursor.walk();
+			cursor.walk();
 	}
 	return false;
 }
@@ -186,9 +150,9 @@ bool Lexer::matchUntil(T str)
 template <typename T>
 bool Lexer::matchWhile(T str)
 {
-	while (!this->cursor.eof)
+	while (!cursor.eof)
 	{
-		if (!this->match(str))
+		if (!match(str))
 			break;
 	}
 	return true;
@@ -197,32 +161,60 @@ bool Lexer::matchWhile(T str)
 template <typename T>
 bool Lexer::matchScope(T strOpen, T strClose)
 {
-	if (!this->match(strOpen))
+	if (!match(strOpen))
 		return false;
 	int lvl = 0;
 
-	while (!this->cursor.eof)
+	while (!cursor.eof)
 	{
-		if (this->match(strOpen))
+		if (match(strOpen))
 			lvl++;
-		else if (this->match(strClose))
+		else if (match(strClose))
 		{
 			lvl--;
 			if (lvl < 0)
 				return true;
 		}
 		else
-			this->cursor.walk();
+			cursor.walk();
 	}
 
 	return false;
 }
 
 template <typename T>
-bool Lexer::expect(T str, std::string msg) throw(LexerException) {
-	const Cursor tCursor = this->cursor;
+bool Lexer::expect(T str, std::string msg) throw(LexerException)
+{
+	const Cursor tCursor = cursor;
 
-	if (this->match(str)) return true;
+	if (match(str))
+		return true;
 
 	throw(LexerException(msg, tCursor));
+}
+
+std::vector<Token> Lexer::tokenize()
+{
+	std::vector<Token> tokens;
+
+	while (!cursor.eof)
+	{
+		const Token token = getToken();
+		if (!token.isNull())
+		{
+			tokens.push_back(token);
+		}
+		else
+			cursor.walk();
+	}
+
+	return tokens;
+}
+
+Token& Token::operator|(const Token& b) {
+	if (!isNull()) {
+		return *this;
+	} else {
+		return (Token&)b;
+	}
 }

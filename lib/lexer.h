@@ -20,17 +20,28 @@ public:
 
 	const char *what() const throw()
 	{
-		return this->msg.c_str();
+		return msg.c_str();
 	}
 };
 
 struct Token
 {
+private:
+	bool nullToken;
+
 public:
 	Cursor start;
 	Cursor end;
-	Token(Cursor start, Cursor end) : start(start), end(end) {}
+
+	Token() : nullToken(true) {}
+	Token(Cursor start, Cursor end) : nullToken(false), start(start), end(end) {}
+
+	bool isNull() const { return nullToken; }
+
+	Token& operator |(const Token& b);
 };
+
+typedef std::function<bool()> matchFunc;
 
 class Lexer
 {
@@ -50,7 +61,7 @@ protected:
 
 		for (int i = from; i <= to; i++)
 		{
-			s += this->matchStack[i];
+			s += matchStack[i];
 		}
 
 		return s;
@@ -62,7 +73,6 @@ protected:
 	Cursor getCursorEnd(int pos);
 
 	bool match(std::string str);
-	bool match(bool (*func)(), bool sliceRange = false);
 	bool match(std::function<bool()> func, bool sliceRange = false);
 	bool match(std::regex reg);
 
@@ -79,6 +89,8 @@ protected:
 
 public:
 	Lexer(std::string input);
+
+	std::vector<Token> tokenize();
 };
 
 #endif

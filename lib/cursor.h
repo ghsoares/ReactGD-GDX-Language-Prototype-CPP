@@ -20,6 +20,7 @@ public:
 	bool eof;
 	bool lineBreak;
 
+	Cursor();
 	Cursor(std::string i);
 
 	void walk(bool back = false);

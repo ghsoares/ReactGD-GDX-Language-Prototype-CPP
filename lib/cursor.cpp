@@ -3,63 +3,63 @@
 
 Cursor::Cursor(std::string i)
 {
-	this->input = i;
-	this->inputLength = i.length();
-	this->character = i.at(0);
-	this->pos = 0;
-	this->line = 0;
-	this->column = 0;
-	this->eof = false;
-	this->lineBreak = false;
+	input = i;
+	inputLength = i.length();
+	character = i.at(0);
+	pos = 0;
+	line = 0;
+	column = 0;
+	eof = false;
+	lineBreak = false;
 }
 
 char Cursor::getChar(int pos)
 {
-	if (pos < 0 || pos >= this->inputLength)
+	if (pos < 0 || pos >= inputLength)
 	{
 		return EOF;
 	}
-	return this->input.at(pos);
+	return input.at(pos);
 }
 
 void Cursor::walk(bool back)
 {
 	if (back)
 	{
-		this->pos--;
-		this->column--;
-		if (this->lineBreak)
+		pos--;
+		column--;
+		if (lineBreak)
 		{
-			this->line--;
-			this->column = 0;
-			for (int i = this->pos - 1; i >= 0; i--)
+			line--;
+			column = 0;
+			for (int i = pos - 1; i >= 0; i--)
 			{
-				if (this->getChar(i) == '\n')
+				if (getChar(i) == '\n')
 					break;
-				this->column++;
+				column++;
 			}
 		}
 	}
 	else
 	{
-		this->pos++;
-		this->column++;
-		if (this->lineBreak)
+		pos++;
+		column++;
+		if (lineBreak)
 		{
-			this->line++;
-			this->column = 0;
+			line++;
+			column = 0;
 		}
 	}
-	this->character = this->getChar(this->pos);
-	this->eof = this->character == EOF;
-	this->lineBreak = this->character == '\n';
+	character = getChar(pos);
+	eof = character == EOF;
+	lineBreak = character == '\n';
 }
 
 void Cursor::walkTimes(int times, bool back)
 {
 	for (int i = 0; i < times; i++)
 	{
-		this->walk(back);
+		walk(back);
 	}
 }
 
@@ -67,46 +67,46 @@ void Cursor::move(int pos)
 {
 	if (pos < 0)
 		pos = 0;
-	if (pos > this->inputLength - 1)
-		pos = this->inputLength - 1;
+	if (pos > inputLength - 1)
+		pos = inputLength - 1;
 
-	this->pos = 0;
-	this->character = this->input.at(0);
-	this->line = 0;
-	this->column = 0;
-	this->eof = false;
-	this->lineBreak = this->character == '\n';
+	pos = 0;
+	character = input.at(0);
+	line = 0;
+	column = 0;
+	eof = false;
+	lineBreak = character == '\n';
 
-	while (this->pos < pos)
-		this->walk();
+	while (pos < pos)
+		walk();
 }
 
 void Cursor::skipIgnore()
 {
-	while (this->character == ' ' ||
-				 this->character == '\n' ||
-				 this->character == '\t')
-		this->walk();
+	while (character == ' ' ||
+				 character == '\n' ||
+				 character == '\t')
+		walk();
 
-	if (this->character == '#')
+	if (character == '#')
 	{
-		while (!this->eof && this->character != '\n')
-			this->walk();
+		while (!eof && character != '\n')
+			walk();
 	}
 
-	while (this->character == ' ' ||
-				 this->character == '\n' ||
-				 this->character == '\t')
-		this->walk();
+	while (character == ' ' ||
+				 character == '\n' ||
+				 character == '\t')
+		walk();
 }
 
 std::string Cursor::toString()
 {
 	std::stringstream ss("");
-	ss << "(P:" << this->pos;
-	ss << " L:" << this->line;
-	ss << " C:" << this->column;
-	ss << " \"" << this->character << "\")";
+	ss << "(P:" << pos;
+	ss << " L:" << line;
+	ss << " C:" << column;
+	ss << " \"" << character << "\")";
 
 	return ss.str();
 }
