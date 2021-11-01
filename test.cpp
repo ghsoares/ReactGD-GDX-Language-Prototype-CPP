@@ -1,20 +1,21 @@
 #include <iostream>
-#include "lib/gdx/GDXLexer.h"
+#include "lib/lexer.h"
 
 int main()
 {
-	std::string input = "extends ReactGDComponent\nclass_name Test";
-	input = "09123 123";
+	std::string input = "Something to test";
 
-	GDXLexer lexer(input);
-	auto tokens = lexer.tokenize();
+	Lexer lexer;
+	lexer.set_source(&input);
 
-	for (int i = 0; i < tokens.size(); i++) {
-		ClassNameToken* classNameToken = static_cast<ClassNameToken*>(&tokens[i]);
-
-		if (classNameToken != 0) {
-			std::cout << classNameToken->className << std::endl;
-		}
+	lexer.match("Something");
+	if (lexer.found_match())
+	{
+		std::cout << lexer.get_str(-1) << std::endl;
+	}
+	else
+	{
+		std::cout << "no match" << std::endl;
 	}
 
 	return 0;

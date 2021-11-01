@@ -1,11 +1,11 @@
 #include <sstream>
 #include "cursor.h"
 
-Cursor::Cursor(std::string i)
+Cursor::Cursor(std::string *i)
 {
 	input = i;
-	inputLength = i.length();
-	character = i.at(0);
+	inputLength = i->length();
+	character = i->at(0);
 	pos = 0;
 	line = 0;
 	column = 0;
@@ -19,7 +19,7 @@ char Cursor::getChar(int pos)
 	{
 		return EOF;
 	}
-	return input.at(pos);
+	return input->at(pos);
 }
 
 void Cursor::walk(bool back)
@@ -71,7 +71,7 @@ void Cursor::move(int pos)
 		pos = inputLength - 1;
 
 	pos = 0;
-	character = input.at(0);
+	character = input->at(0);
 	line = 0;
 	column = 0;
 	eof = false;

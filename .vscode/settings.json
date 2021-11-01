@@ -53,7 +53,27 @@
 		"map": "cpp",
 		"ratio": "cpp",
 		"regex": "cpp",
-		"shared_mutex": "cpp"
+		"shared_mutex": "cpp",
+		"xstring": "cpp",
+		"compare": "cpp",
+		"concepts": "cpp",
+		"ios": "cpp",
+		"list": "cpp",
+		"locale": "cpp",
+		"xfacet": "cpp",
+		"xiosbase": "cpp",
+		"xlocale": "cpp",
+		"xlocbuf": "cpp",
+		"xlocinfo": "cpp",
+		"xlocmes": "cpp",
+		"xlocmon": "cpp",
+		"xlocnum": "cpp",
+		"xloctime": "cpp",
+		"xmemory": "cpp",
+		"xstddef": "cpp",
+		"xtr1common": "cpp",
+		"xtree": "cpp",
+		"xutility": "cpp"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }

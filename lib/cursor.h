@@ -7,7 +7,7 @@
 struct Cursor
 {
 private:
-	std::string input;
+	std::string *input;
 	int inputLength;
 
 	char getChar(int p);
@@ -21,13 +21,22 @@ public:
 	bool lineBreak;
 
 	Cursor();
-	Cursor(std::string i);
+	Cursor(std::string *i);
 
 	void walk(bool back = false);
 	void walkTimes(int times, bool back = false);
 	void move(int toPos);
 	void skipIgnore();
 	std::string toString();
+};
+
+struct CursorRange {
+	public:
+		Cursor *start;
+		Cursor *end;
+
+		CursorRange();
+		CursorRange(Cursor *start, Cursor *end): start(start), end(end) {}
 };
 
 #endif

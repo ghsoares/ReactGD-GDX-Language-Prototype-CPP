@@ -24,70 +24,61 @@ public:
 	}
 };
 
-struct Token
+struct MatchScope
 {
-private:
-	bool nullToken;
-
 public:
-	Cursor start;
-	Cursor end;
+	Cursor *cursorStart;
+	int stackPos;
+	bool prevMatch;
+	bool matching;
+	bool notMatch;
+	std::string expectMsg;
 
-	Token() : nullToken(true) {}
-	Token(Cursor start, Cursor end) : nullToken(false), start(start), end(end) {}
-
-	bool isNull() const { return nullToken; }
-
-	Token& operator |(const Token& b);
+	MatchScope(
+			Cursor *cursorStart,
+			int stackPos) : cursorStart(cursorStart)
+	{
+		stackPos = stackPos;
+		prevMatch = false;
+		matching = true;
+		notMatch = false;
+		expectMsg = "";
+	}
 };
 
 class Lexer
 {
 private:
-	std::string input;
-
-protected:
-	Cursor cursor;
-	std::vector<std::string> matchStack;
-	std::vector<std::vector<Cursor>> cursorStack;
-
-	std::string fromSliced(int from, int to = -1)
-	{
-		std::string s = "";
-		if (to == -1)
-			to = matchStack.size() - 1;
-
-		for (int i = from; i <= to; i++)
-		{
-			s += matchStack[i];
-		}
-
-		return s;
-	}
-
-	std::string getStr(int pos);
-	void setStr(int pos, std::string str);
-	Cursor getCursorStart(int pos);
-	Cursor getCursorEnd(int pos);
-
-	bool match(std::string str);
-	bool match(std::regex reg);
-
-	template <typename T>
-	bool matchUntil(T str);
-	template <typename T>
-	bool matchWhile(T str);
-	template <typename T>
-	bool matchScope(T strOpen, T strClose);
-	template <typename T>
-	bool expect(T str, std::string msg);
-
-	virtual Token getToken();
+	std::string *source;
 
 public:
-	Lexer(std::string input);
+	MatchScope *curr_scope;
+	Cursor *cursor;
+	std::vector<MatchScope *> scope_stack;
+	std::vector<std::string *> string_stack;
+	std::vector<CursorRange *> range_stack;
 
-	std::vector<Token> tokenize();
+	std::string *get_str(int pos);
+	void set_str(int pos, std::string *str);
+	CursorRange *get_range(int pos);
+
+	Lexer *match_start();
+	Lexer *match_end(bool resetCursor = true);
+	bool found_match();
+	Lexer *m_and();
+	Lexer *m_or();
+	Lexer *m_not();
+
+	Lexer *match(std::string str);
+	Lexer *match(std::regex reg);
+
+	Lexer *expect_next(std::string msg);
+	Lexer *expect_prev(std::string msg);
+
+//public:
+	void reset();
+	void set_source(std::string *source);
+	std::string *get_source();
 };
 
 #endif
