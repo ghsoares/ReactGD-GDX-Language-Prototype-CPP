@@ -41,8 +41,6 @@ public:
 	Token& operator |(const Token& b);
 };
 
-typedef std::function<bool()> matchFunc;
-
 class Lexer
 {
 private:
@@ -73,7 +71,6 @@ protected:
 	Cursor getCursorEnd(int pos);
 
 	bool match(std::string str);
-	bool match(std::function<bool()> func, bool sliceRange = false);
 	bool match(std::regex reg);
 
 	template <typename T>
@@ -83,7 +80,7 @@ protected:
 	template <typename T>
 	bool matchScope(T strOpen, T strClose);
 	template <typename T>
-	bool expect(T str, std::string msg) throw(LexerException);
+	bool expect(T str, std::string msg);
 
 	virtual Token getToken();
 

@@ -73,42 +73,6 @@ bool Lexer::match(std::string str)
 	return false;
 }
 
-bool Lexer::match(std::function<bool()> func, bool sliceRange)
-{
-	cursor.skipIgnore();
-
-	const Cursor tCursor = cursor;
-	const int mPos = matchStack.size();
-
-	if (func())
-	{
-		if (sliceRange)
-		{
-			const std::string str = input.substr(
-					tCursor.pos,
-					getCursorEnd(-1).pos - tCursor.pos + 1);
-			matchStack.push_back(str);
-		}
-		else
-		{
-			const std::string str = fromSliced(mPos);
-			matchStack.push_back(str);
-		}
-		cursorStack.push_back({tCursor, cursor});
-		return true;
-	}
-	else
-	{
-		for (int i = cursorStack.size() - 1; i >= mPos; i--)
-		{
-			matchStack.pop_back();
-			cursorStack.pop_back();
-		}
-		cursor.move(tCursor.pos);
-	}
-	return false;
-}
-
 bool Lexer::match(std::regex reg)
 {
 	cursor.skipIgnore();
@@ -183,7 +147,7 @@ bool Lexer::matchScope(T strOpen, T strClose)
 }
 
 template <typename T>
-bool Lexer::expect(T str, std::string msg) throw(LexerException)
+bool Lexer::expect(T str, std::string msg)
 {
 	const Cursor tCursor = cursor;
 

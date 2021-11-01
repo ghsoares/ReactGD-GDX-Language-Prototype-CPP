@@ -46,12 +46,7 @@ bool GDXLexer::T_VALUE()
 {
 	auto a = T_GDBLOCK;
 
-	return (
-			match((matchFunc)&T_GDBLOCK) ||
-			match((matchFunc)&T_ACCESSOR) ||
-			match((matchFunc)&T_FUNCTION_CALL) ||
-			match((matchFunc)&T_LITERAL) ||
-			match((matchFunc)&T_SYMBOL));
+	return false;
 }
 
 bool GDXLexer::T_SYMBOL()
@@ -89,14 +84,15 @@ bool GDXLexer::T_STRING()
 
 bool GDXLexer::T_ACCESSOR()
 {
-	return match((matchFunc)[this]()
+	return false;
+	/*return match((matchFunc)[this]()
 							 { return (
 										 T_ACCESSOR_ANY() &&
 										 match(".") &&
 										 expect((matchFunc)&T_ACCESSOR_ANY, "Expected value") &&
 										 matchWhile([this]()
 																{ return match(".") && expect((matchFunc)&T_ACCESSOR_ANY, "Expected value"); })); },
-							 true);
+							 true);*/
 }
 
 bool GDXLexer::T_ACCESSOR_ANY()
@@ -110,7 +106,7 @@ bool GDXLexer::T_ACCESSOR_ANY()
 
 bool GDXLexer::T_GDBLOCK()
 {
-	int mPos = matchStack.size();
+	/*int mPos = matchStack.size();
 	const bool foundBlock = match([this]()
 																{ return matchScope("{", "}"); });
 	if (foundBlock)
@@ -121,29 +117,31 @@ bool GDXLexer::T_GDBLOCK()
 						getCursorStart(mPos).pos + 1,
 						getCursorEnd(-1).pos - 1));
 		return true;
-	}
+	}*/
 
 	return false;
 }
 
 bool GDXLexer::T_FUNCTION_CALL()
 {
-	return match([this]()
+	/*return match([this]()
 							 { return (
 										 T_SYMBOL() &&
 										 match("(") &&
 										 T_FUNCTION_CALL_ARGS() &&
-										 expect(")", "Expected \")\"")); });
+										 expect(")", "Expected \")\"")); });*/
+
+	return false;
 }
 
 bool GDXLexer::T_FUNCTION_CALL_ARGS()
 {
 	if (T_VALUE())
 	{
-		return matchWhile([this]()
+		/*return matchWhile([this]()
 											{ return (
 														match(",") &&
-														expect(T_VALUE, "Expected value")); });
+														expect(T_VALUE, "Expected value")); });*/
 	}
 	return true;
 }
