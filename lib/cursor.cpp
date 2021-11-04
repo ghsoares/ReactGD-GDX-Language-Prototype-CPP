@@ -4,7 +4,7 @@
 Cursor::Cursor(std::string *i)
 {
 	input = i;
-	inputLength = i->length();
+	inputLength = i->size();
 	character = i->at(0);
 	pos = 0;
 	line = 0;

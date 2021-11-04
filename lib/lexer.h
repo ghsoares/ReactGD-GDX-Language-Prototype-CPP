@@ -11,10 +11,10 @@ struct LexerException : public std::exception
 {
 private:
 	std::string msg;
-	Cursor cursor;
+	Cursor *cursor;
 
 public:
-	explicit LexerException(std::string msg, Cursor cursor) : msg(msg), cursor(cursor)
+	explicit LexerException(std::string msg, Cursor *cursor) : msg(msg), cursor(cursor)
 	{
 	}
 

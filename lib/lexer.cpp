@@ -2,8 +2,7 @@
 
 void Lexer::reset()
 {
-	Cursor c = Cursor(source);
-	cursor = &c;
+	cursor = new Cursor(source);
 	scope_stack.clear();
 	string_stack.clear();
 	range_stack.clear();
@@ -57,10 +56,7 @@ CursorRange *Lexer::get_range(int pos)
 {
 	if (range_stack.size() == 0)
 	{
-		Cursor start(source);
-		Cursor end(source);
-		CursorRange range(&start, &end);
-		return &range;
+		return new CursorRange(new Cursor(source), new Cursor(source));
 	}
 	while (pos < 0)
 	{
@@ -81,10 +77,7 @@ Lexer *Lexer::match_start()
 	}
 	cursor->skipIgnore();
 
-	Cursor tc(*cursor);
-	MatchScope sc(&tc, string_stack.size());
-
-	curr_scope = &sc;
+	curr_scope = new MatchScope(new Cursor(*cursor), string_stack.size());
 
 	return this;
 }
@@ -93,19 +86,18 @@ Lexer *Lexer::match_end(bool returnCursor)
 {
 	if (curr_scope->prevMatch)
 	{
-		Cursor cursorStart = *curr_scope->cursorStart;
-		Cursor cursorEnd = Cursor(
+		Cursor *cursorStart = curr_scope->cursorStart;
+		Cursor *cursorEnd = new Cursor(
 				*get_range(-1)->start);
+		
 		std::string str = source->substr(
-				cursorStart.pos,
-				cursorEnd.pos - cursorStart.pos + 1);
+				cursorStart->pos,
+				cursorEnd->pos - cursorStart->pos + 1);
 		if (str != *string_stack[string_stack.size() - 1])
 		{
-			CursorRange range(
-					&cursorStart, &cursorEnd);
 
 			string_stack.push_back(&str);
-			range_stack.push_back(&range);
+			range_stack.push_back(new CursorRange(cursorStart, cursorEnd));
 		}
 	}
 	else
@@ -175,7 +167,7 @@ Lexer *Lexer::match(std::string str)
 
 	cursor->skipIgnore();
 
-	Cursor tCursor = Cursor(*cursor);
+	Cursor *tCursor = new Cursor(*cursor);
 
 	std::string sliced = source->substr(
 			cursor->pos,
@@ -191,11 +183,10 @@ Lexer *Lexer::match(std::string str)
 		if (matched)
 		{
 			string_stack.push_back(&str);
-			Cursor startCursor = Cursor(*cursor);
+			Cursor *startCursor = new Cursor(*cursor);
 			cursor->walkTimes(str.size() - 1);
-			Cursor endCursor = Cursor(*cursor);
-			CursorRange range(&startCursor, &endCursor);
-			range_stack.push_back(&range);
+			Cursor *endCursor = new Cursor(*cursor);
+			range_stack.push_back(new CursorRange(startCursor, endCursor));
 			cursor->walkTimes(1);
 		}
 	}
@@ -219,7 +210,7 @@ Lexer *Lexer::match(std::regex reg)
 
 	cursor->skipIgnore();
 
-	Cursor tCursor = Cursor(*cursor);
+	Cursor *tCursor = new Cursor(*cursor);
 
 	const std::string ss = source->substr(cursor->pos);
 	std::smatch match;
@@ -235,11 +226,10 @@ Lexer *Lexer::match(std::regex reg)
 		{
 			std::string match_str = match.str();
 			string_stack.push_back(&match_str);
-			Cursor startCursor = Cursor(*cursor);
+			Cursor *startCursor = new Cursor(*cursor);
 			cursor->walkTimes(match.length() - 1);
-			Cursor endCursor = Cursor(*cursor);
-			CursorRange range(&startCursor, &endCursor);
-			range_stack.push_back(&range);
+			Cursor *endCursor = new Cursor(*cursor);
+			range_stack.push_back(new CursorRange(startCursor, endCursor));
 			cursor->walkTimes(1);
 		}
 	}
@@ -274,7 +264,7 @@ Lexer *Lexer::expect_prev(std::string msg)
 	if (!this->curr_scope->prevMatch)
 	{
 		throw LexerException(
-				msg, *get_range(-1)->start);
+				msg, get_range(-1)->start);
 	}
 
 	return this;
