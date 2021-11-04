@@ -1,0 +1,5 @@
+logs/
+build/
+.xmake/
+.cache/
+docs/
